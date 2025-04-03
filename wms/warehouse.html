@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>임대신청 - 창고 목록</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        
+        body {
+            background-color: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 30px 40px;
+            background-color: #fff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            min-height: 80vh;
+            border-radius: 12px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            color: #1e3a8a;
+            font-size: 32px;
+            margin: 0;
+            padding-bottom: 0;
+            border: none;
+        }
+        
+        .steps-container {
+            margin-bottom: 50px;
+        }
+        
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            position: relative;
+            width: 80%;
+            margin: 0 auto 40px;
+        }
+        
+        .progress-bar::before {
+            content: "";
+            position: absolute;
+            top: 25px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: #e5e7eb;
+            z-index: 1;
+        }
+        
+        .progress-bar::after {
+            content: "";
+            position: absolute;
+            top: 25px;
+            left: 0;
+            width: 18%;
+            height: 4px;
+            background-color: #22c55e;
+            z-index: 1;
+            transition: width 0.4s ease;
+        }
+        
+        .step {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: relative;
+            z-index: 2;
+            font-size: 18px;
+            border: 3px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        
+        .step.active {
+            background-color: #22c55e;
+            color: white;
+            border-color: #16a34a;
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+        }
+        
+        .step-label {
+            position: absolute;
+            top: 55px;
+            white-space: nowrap;
+            text-align: center;
+            font-size: 16px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .step.active .step-label {
+            color: #16a34a;
+            font-weight: bold;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        h3 {
+            color: #1e3a8a;
+            font-size: 22px;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        h3 i {
+            margin-right: 10px;
+            color: #22c55e;
+        }
+        
+        .search-filters-container {
+            background-color: #f8fafc;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .search-box {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            flex-grow: 1;
+            padding: 12px 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-right: 15px;
+            transition: border-color 0.3s;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+        }
+        
+        .search-btn {
+            padding: 12px 24px;
+            background-color: #22c55e;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .search-btn i {
+            margin-right: 8px;
+        }
+        
+        .search-btn:hover {
+            background-color: #16a34a;
+        }
+        
+        .filter-box {
+            display: flex;
+            justify-content: flex-start;
+            gap: 20px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        
+        .filter-label {
+            font-size: 14px;
+            color: #4b5563;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .filter-select {
+            padding: 10px 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 15px;
+            background-color: #fff;
+            transition: border-color 0.3s;
+            cursor: pointer;
+        }
+        
+        .filter-select:focus {
+            outline: none;
+            border-color: #22c55e;
+        }
+        
+        .warehouse-table-container {
+            background-color: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .warehouse-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 0;
+        }
+        
+        .warehouse-table th, .warehouse-table td {
+            border: none;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 18px 20px;
+            text-align: left;
+        }
+        
+        .warehouse-table th {
+            background-color: #f1f5f9;
+            font-weight: 600;
+            color: #1e3a8a;
+            font-size: 15px;
+            white-space: nowrap;
+        }
+        
+        .warehouse-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .warehouse-row {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .warehouse-row:hover {
+            background-color: #f0f9ff;
+        }
+        
+        .warehouse-row.selected {
+            background-color: #dcfce7;
+            position: relative;
+        }
+        
+        .warehouse-row.selected td:first-child::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 5px;
+            background-color: #22c55e;
+        }
+        
+        .warehouse-row td {
+            vertical-align: middle;
+        }
+        
+        .status-tag {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            background-color: #dcfce7;
+            color: #16a34a;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        
+        .pagination button {
+            margin: 0 5px;
+            padding: 10px 16px;
+            background-color: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+        
+        .pagination button.active {
+            background-color: #22c55e;
+            color: white;
+            border: 1px solid #22c55e;
+            font-weight: 600;
+        }
+        
+        .pagination button:hover:not(.active) {
+            background-color: #f3f4f6;
+            border-color: #d1d5db;
+        }
+        
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+        
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .btn-back {
+            background-color: #f3f4f6;
+            color: #4b5563;
+        }
+        
+        .btn-back:hover {
+            background-color: #e5e7eb;
+        }
+        
+        .btn-back i {
+            margin-right: 8px;
+        }
+        
+        .btn-next {
+            background-color: #22c55e;
+            color: white;
+        }
+        
+        .btn-next:hover:not(:disabled) {
+            background-color: #16a34a;
+        }
+        
+        .btn-next:disabled {
+            background-color: #d1d5db;
+            cursor: not-allowed;
+        }
+        
+        .btn-next i {
+            margin-left: 8px;
+        }
+        
+        .feature-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            background-color: #f0f9ff;
+            color: #0284c7;
+            border-radius: 20px;
+            margin-right: 5px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>창고 임대 신청</h1>
+        </div>
+        
+        <div class="steps-container">
+            <div class="progress-bar">
+                <div class="step active">
+                    1
+                    <div class="step-label">창고 선택</div>
+                </div>
+                <div class="step">
+                    2
+                    <div class="step-label">섹터 선택</div>
+                </div>
+                <div class="step">
+                    3
+                    <div class="step-label">가격/기간 선택</div>
+                </div>
+                <div class="step">
+                    4
+                    <div class="step-label">신청 완료</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-header">
+            <h3><i class="fas fa-warehouse"></i> 창고 목록</h3>
+        </div>
+        
+        <div class="search-filters-container">
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="창고 이름 또는 위치로 검색">
+                <button class="search-btn"><i class="fas fa-search"></i> 검색</button>
+            </div>
+            
+            <div class="filter-box">
+                <div class="filter-group">
+                    <label class="filter-label">지역</label>
+                    <select class="filter-select">
+                        <option value="">전체 지역</option>
+                        <option value="seoul">서울</option>
+                        <option value="gyeonggi">경기도</option>
+                        <option value="incheon">인천</option>
+                        <option value="busan">부산</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">창고 유형</label>
+                    <select class="filter-select">
+                        <option value="">전체 유형</option>
+                        <option value="standard">일반 창고</option>
+                        <option value="cold">냉장/냉동 창고</option>
+                        <option value="automated">자동화 창고</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">크기</label>
+                    <select class="filter-select">
+                        <option value="">전체 크기</option>
+                        <option value="small">소형 (500㎡ 이하)</option>
+                        <option value="medium">중형 (500㎡~1,000㎡)</option>
+                        <option value="large">대형 (1,000㎡ 이상)</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">정렬 기준</label>
+                    <select class="filter-select">
+                        <option value="name">이름순</option>
+                        <option value="area">면적순</option>
+                        <option value="location">위치순</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="warehouse-table-container">
+            <table class="warehouse-table">
+                <thead>
+                    <tr>
+                        <th>창고 ID</th>
+                        <th>창고명</th>
+                        <th>위치</th>
+                        <th>총 면적</th>
+                        <th>특징</th>
+                        <th>상태</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="warehouse-row" onclick="selectWarehouse(this)">
+                        <td>WH001</td>
+                        <td>A-101</td>
+                        <td>서울 강남구 테헤란로</td>
+                        <td>500㎡</td>
+                        <td>
+                            <span class="feature-tag">일반 창고</span>
+                            <span class="feature-tag">보안 시스템</span>
+                        </td>
+                        <td><span class="status-tag">사용 가능</span></td>
+                    </tr>
+                    <tr class="warehouse-row" onclick="selectWarehouse(this)">
+                        <td>WH002</td>
+                        <td>B-201</td>
+                        <td>서울 마포구 월드컵로</td>
+                        <td>750㎡</td>
+                        <td>
+                            <span class="feature-tag">냉장 창고</span>
+                            <span class="feature-tag">자동화 시스템</span>
+                        </td>
+                        <td><span class="status-tag">사용 가능</span></td>
+                    </tr>
+                    <tr class="warehouse-row" onclick="selectWarehouse(this)">
+                        <td>WH003</td>
+                        <td>C-301</td>
+                        <td>경기도 파주시 탄현동</td>
+                        <td>1,200㎡</td>
+                        <td>
+                            <span class="feature-tag">대형 창고</span>
+                            <span class="feature-tag">물류 시스템</span>
+                        </td>
+                        <td><span class="status-tag">사용 가능</span></td>
+                    </tr>
+                    <tr class="warehouse-row" onclick="selectWarehouse(this)">
+                        <td>WH004</td>
+                        <td>D-401</td>
+                        <td>인천 연수구 송도동</td>
+                        <td>950㎡</td>
+                        <td>
+                            <span class="feature-tag">냉동 창고</span>
+                            <span class="feature-tag">24시간 모니터링</span>
+                        </td>
+                        <td><span class="status-tag">사용 가능</span></td>
+                    </tr>
+                    <tr class="warehouse-row" onclick="selectWarehouse(this)">
+                        <td>WH005</td>
+                        <td>E-501</td>
+                        <td>부산 해운대구 센텀시티</td>
+                        <td>800㎡</td>
+                        <td>
+                            <span class="feature-tag">항만 인접</span>
+                            <span class="feature-tag">자동화 시스템</span>
+                        </td>
+                        <td><span class="status-tag">사용 가능</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="pagination">
+            <button><i class="fas fa-chevron-left"></i> 이전</button>
+            <button class="active">1</button>
+            <button>2</button>
+            <button>3</button>
+            <button>다음 <i class="fas fa-chevron-right"></i></button>
+        </div>
+        
+        <div class="btn-group">
+            <button class="btn btn-back" onclick="history.back()"><i class="fas fa-arrow-left"></i> 이전</button>
+            <button class="btn btn-next" id="nextBtn" disabled onclick="goToNextPage()">다음 <i class="fas fa-arrow-right"></i></button>
+        </div>
+    </div>
+
+    <script>
+        let selectedWarehouseId = null;
+
+        function selectWarehouse(row) {
+            // 이전에 선택된 행의 클래스 제거
+            const allRows = document.querySelectorAll('.warehouse-row');
+            allRows.forEach(r => r.classList.remove('selected'));
+
+            // 선택된 행에 클래스 추가
+            row.classList.add('selected');
+
+            // 선택된 창고 ID 저장
+            selectedWarehouseId = row.cells[0].innerText;
+
+            // 세션 스토리지에 선택한 창고 ID 저장
+            sessionStorage.setItem('selectedWarehouseId', selectedWarehouseId);
+
+            // 다음 버튼 활성화
+            document.getElementById('nextBtn').disabled = false;
+        }
+
+        function goToNextPage() {
+            if (!selectedWarehouseId) {
+                alert('창고를 선택해주세요.');
+                return;
+            }
+            window.location.href = 'sector.html';
+        }
+    </script>
+</body>
+</html>

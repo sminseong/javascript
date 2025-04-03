@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>출고 신청 - 수량 입력</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Noto Sans KR', sans-serif; }
+    body { background-color: #f0f2f5; color: #333; line-height: 1.6; }
+    .container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 30px 40px;
+      background-color: #fff;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      min-height: 80vh;
+    }
+    h1 {
+      color: #1e3a8a;
+      font-size: 32px;
+      margin-bottom: 40px;
+    }
+    .progress-bar {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      margin: 0 auto 40px;
+      width: 80%;
+    }
+    .progress-bar::before {
+      content: "";
+      position: absolute;
+      top: 25px;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background-color: #e5e7eb;
+      z-index: 1;
+    }
+    .progress-bar::after {
+      content: "";
+      position: absolute;
+      top: 25px;
+      left: 0;
+      width: 66%;
+      height: 4px;
+      background-color: #22c55e;
+      z-index: 1;
+    }
+    .step {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      position: relative;
+      z-index: 2;
+      font-size: 18px;
+      border: 3px solid #e5e7eb;
+      transition: all 0.3s ease;
+    }
+    .step.active {
+      background-color: #22c55e;
+      color: white;
+      border-color: #16a34a;
+      box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+    }
+    .step-label {
+      position: absolute;
+      top: 55px;
+      white-space: nowrap;
+      text-align: center;
+      font-size: 16px;
+      color: #6b7280;
+      font-weight: 500;
+    }
+    .step.active .step-label {
+      color: #16a34a;
+      font-weight: bold;
+    }
+    .summary {
+      background-color: #f8fafc;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      border-left: 4px solid #22c55e;
+    }
+    .form-group {
+      margin-bottom: 25px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 10px;
+    }
+    input[type="number"], input[type="date"] {
+      width: 300px;
+      padding: 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    .btn-group {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 40px;
+    }
+    .btn {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+    }
+    .btn i {
+      margin: 0 6px;
+    }
+    .btn-back {
+      background-color: #f3f4f6;
+      color: #4b5563;
+    }
+    .btn-back:hover {
+      background-color: #e5e7eb;
+    }
+    .btn-next {
+      background-color: #22c55e;
+      color: white;
+    }
+    .btn-next:hover:not(:disabled) {
+      background-color: #16a34a;
+    }
+    .btn-next:disabled {
+      background-color: #d1d5db;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>출고 신청 - 수량 입력</h1>
+
+    <div class="progress-bar">
+      <div class="step active">
+        1
+        <div class="step-label">제품 선택</div>
+      </div>
+      <div class="step active">
+        2
+        <div class="step-label">수량 입력</div>
+      </div>
+      <div class="step">
+        3
+        <div class="step-label">신청 확인</div>
+      </div>
+    </div>
+
+    <div class="summary">
+      <strong>선택한 재고번호:</strong> <span id="selectedStockId">-</span>
+    </div>
+
+    <div class="form-group">
+      <label for="quantity">출고 수량</label>
+      <input type="number" id="quantity" placeholder="출고할 수량을 입력하세요" min="1">
+    </div>
+
+    <div class="form-group">
+      <label for="outgoingDate">출고 희망일</label>
+      <input type="date" id="outgoingDate" min="">
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-back" onclick="goBack()"><i class="fas fa-arrow-left"></i> 이전</button>
+      <button class="btn btn-next" id="nextBtn" disabled onclick="goNext()">다음 <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <script>
+    const today = new Date();
+    document.getElementById("outgoingDate").min = today.toISOString().split("T")[0];
+
+    const quantityInput = document.getElementById("quantity");
+    const dateInput = document.getElementById("outgoingDate");
+    const nextBtn = document.getElementById("nextBtn");
+    const selectedStockId = sessionStorage.getItem("outgoingStockId") || "-";
+    document.getElementById("selectedStockId").textContent = selectedStockId;
+
+    quantityInput.addEventListener("input", checkForm);
+    dateInput.addEventListener("input", checkForm);
+
+    function checkForm() {
+      nextBtn.disabled = !(quantityInput.value && dateInput.value);
+    }
+
+    function goBack() {
+      window.location.href = "outgoing_product.html";
+    }
+
+    function goNext() {
+      sessionStorage.setItem("outgoingQuantity", quantityInput.value);
+      sessionStorage.setItem("outgoingDate", dateInput.value);
+      window.location.href = "outgoing_confirm.html";
+    }
+  </script>
+</body>
+</html>
