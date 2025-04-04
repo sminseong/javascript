@@ -1,0 +1,24 @@
+<script>
+    function info(subject, credit) {
+        this.subject = subject
+        this.credit = credit
+        this.printOut = function() {
+            return this.subject + ", " + this.credit + '학점';
+        }
+    };
+
+    let subject1 = new info('HTML', 3);
+    //subject1의 과목명
+    document.writeln(subject1.subject);
+    //subject1의 학점
+    document.writeln(subject1.credit);
+    //subject1의 전체 속성 정보를 출력하세요
+    document.writeln(subject1.printOut());
+
+    // info 생성자 함수를 subject1 객체에 days 속성을 추가하고 값으로 30을 할당하세요
+    subject1.days = 30;
+    document.writeln(subje1.days);
+
+    delete subject1.days;
+    document.writeln(subject1.days);
+</script>

@@ -1,0 +1,14 @@
+<script>
+    function add() {
+        var n = 0;
+        return function () {
+            return ++n;
+        }
+    }
+
+    let increase = add();
+    console.log(increase());
+    console.log(increase());
+
+    // add() 함수에서 연산된 지역변수 n 값
+</script>

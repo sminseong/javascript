@@ -1,0 +1,30 @@
+<!-- 
+실습) score 객체
+과목(subject)은 CSS
+학점(credit): 1
+printOut 함수로 해당 score의 과목명, 학점 출력
+
+score 객체를 실행시켜서 
+
+출력
+'CSS, 1'
+-->
+<script>
+    let score = {
+        subject : 'CSS',
+        credit : 1,
+        printOut : function() {
+            return this.subject + ", " + this.credit + '학점';
+        }
+    }
+    
+    document.write(score.printOut() + '<br>');
+
+    score.days = 20;
+    document.write(score.days + '<br>');
+    
+    score.printOut = function() {
+        return this.subject + ', ' + this.credit + '학점' + ", " + this.days + '일';
+    }
+    document.write(score.printOut() + '<br>')
+</script>
